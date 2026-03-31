@@ -36,7 +36,6 @@ class RetroExperienceBaseSwitch(SwitchEntity, RestoreEntity):
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": "Retro Experience",
-            "manufacturer": "piitaya",
         }
         self._attr_is_on = False
 
