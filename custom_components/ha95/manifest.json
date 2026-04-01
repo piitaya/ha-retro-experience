@@ -6,5 +6,5 @@
   "documentation": "https://github.com/piitaya/ha95",
   "integration_type": "service",
   "iot_class": "calculated",
-  "version": "95.0.0"
+  "version": "95.0.1"
 }
