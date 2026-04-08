@@ -36,6 +36,7 @@ class HA95BaseSwitch(SwitchEntity, RestoreEntity):
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": "Home Assistant 95",
+            "entry_type": "service",
         }
         self._attr_is_on = False
 
