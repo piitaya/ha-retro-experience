@@ -387,6 +387,7 @@ const SLEEP_TIMEOUT = 30000;
 const BSOD_CLICK_COUNT = 5;
 const BSOD_CLICK_TIMEOUT = 300;
 const BSOD_DISMISS_DELAY = 500;
+const VIEWPORT_PADDING = 16;
 
 const DOMAIN = "ha95";
 
@@ -680,11 +681,13 @@ class HA95Assistant extends HTMLElement {
     this._boundPointerMove = this._onPointerMove.bind(this);
     this._boundPointerUp = this._onPointerUp.bind(this);
     this._boundDismissBsodOnKey = this._dismissBsod.bind(this);
+    this._boundHandleResize = this._handleResize.bind(this);
   }
 
   connectedCallback() {
     this._loadPosition();
     this._subscribeToState();
+    window.addEventListener("resize", this._boundHandleResize);
   }
 
   disconnectedCallback() {
@@ -699,6 +702,7 @@ class HA95Assistant extends HTMLElement {
       this._stateSubscription();
       this._stateSubscription = null;
     }
+    window.removeEventListener("resize", this._boundHandleResize);
     document.removeEventListener("pointermove", this._boundPointerMove);
     document.removeEventListener("pointerup", this._boundPointerUp);
     document.removeEventListener("keydown", this._boundDismissBsodOnKey);
@@ -848,10 +852,29 @@ class HA95Assistant extends HTMLElement {
 
   _clampPosition(x, y) {
     const size = 80;
+    const padding = VIEWPORT_PADDING;
     return {
-      x: Math.max(0, Math.min(window.innerWidth - size, x)),
-      y: Math.max(0, Math.min(window.innerHeight - size, y)),
+      x: Math.max(padding, Math.min(window.innerWidth - size - padding, x)),
+      y: Math.max(padding, Math.min(window.innerHeight - size - padding, y)),
     };
+  }
+
+  _handleResize() {
+    if (!this._position) return;
+
+    // Re-clamp position to ensure assistant stays in viewable area
+    const oldPosition = this._position;
+    this._position = this._clampPosition(oldPosition.x, oldPosition.y);
+
+    // Update container position if it has been moved from default
+    const container = this.shadowRoot.querySelector(".casita-container");
+    if (container && (oldPosition.x !== this._position.x || oldPosition.y !== this._position.y)) {
+      container.style.left = `${this._position.x}px`;
+      container.style.top = `${this._position.y}px`;
+      container.style.right = "auto";
+      container.style.bottom = "auto";
+      this._savePosition();
+    }
   }
 
   // --- Drag handling ---
